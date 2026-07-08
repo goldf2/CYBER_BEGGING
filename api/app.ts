@@ -7,7 +7,6 @@ import cors from 'cors'
 import path from 'path'
 import dotenv from 'dotenv'
 import { fileURLToPath } from 'url'
-import querystring from 'querystring'
 import authRoutes from './routes/auth.js'
 import paymentRoutes from './routes/payment.js'
 import creemRoutes from './routes/creem.js'
@@ -21,30 +20,12 @@ dotenv.config()
 const app: express.Application = express()
 
 app.use(cors())
-app.use(express.raw({ limit: '10mb', type: '*/*' }))
-
-app.use((req: Request, res: Response, next: NextFunction) => {
-  const rawBody = req.body
-  ;(req as any).rawBody = rawBody
-
-  const contentType = req.headers['content-type'] || ''
-  if (contentType.includes('application/json')) {
-    try {
-      req.body = JSON.parse(rawBody?.toString() || '{}')
-    } catch {
-      req.body = {}
-    }
-  } else if (contentType.includes('application/x-www-form-urlencoded')) {
-    req.body = querystring.parse(rawBody?.toString() || '')
-  } else {
-    req.body = rawBody?.toString() || ''
-  }
-  next()
-})
+app.use(express.json())
+app.use(express.urlencoded({ extended: true }))
 
 app.use('/api/auth', authRoutes)
-app.use('/api/payment', paymentRoutes)
-app.use('/api/creem', creemRoutes)
+app.use('/api/payment', express.raw({ limit: '10mb', type: '*/*' }), paymentRoutes)
+app.use('/api/creem', express.raw({ limit: '10mb', type: '*/*' }), creemRoutes)
 
 app.use(
   '/api/health',

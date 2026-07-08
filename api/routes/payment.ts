@@ -12,7 +12,8 @@ interface CreatePaymentRequest {
 
 router.post('/create', async (req: Request, res: Response): Promise<void> => {
   try {
-    const { amount, description }: CreatePaymentRequest = req.body;
+    const body = typeof req.body === 'string' ? JSON.parse(req.body) : req.body;
+    const { amount, description }: CreatePaymentRequest = body;
 
     if (!amount || amount <= 0) {
       res.status(400).json({ success: false, message: '无效的金额' });

@@ -19,7 +19,8 @@ function getProductId(amount: number): string {
 
 router.post('/create-checkout', async (req: Request, res: Response): Promise<void> => {
   try {
-    const { amount, description } = req.body;
+    const body = typeof req.body === 'string' ? JSON.parse(req.body) : req.body;
+    const { amount, description } = body;
 
     if (!amount || amount <= 0) {
       res.status(400).json({ success: false, message: '无效的金额' });
@@ -67,8 +68,8 @@ router.post('/create-checkout', async (req: Request, res: Response): Promise<voi
 
 router.post('/webhook', async (req: Request, res: Response): Promise<void> => {
   try {
-    const rawBody = (req as any).rawBody;
-    const bodyStr = rawBody?.toString() || '';
+    const rawBody = req.body;
+    const bodyStr = typeof rawBody === 'string' ? rawBody : rawBody?.toString() || '';
     const signature = req.headers['creem-signature'] || '';
 
     const expectedSignature = crypto
