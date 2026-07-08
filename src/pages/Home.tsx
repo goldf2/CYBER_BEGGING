@@ -4,6 +4,7 @@ import CyberHero from '../components/CyberHero';
 import DonationPanel from '../components/DonationPanel';
 import ProgressBar from '../components/ProgressBar';
 import DonationRecords from '../components/DonationRecords';
+import { APP_VERSION, BUILD_TIME } from '../version';
 
 interface Donation {
   id: string;
@@ -195,9 +196,10 @@ export default function Home() {
             <span className="text-gray-500 font-cyber text-xs">SYSTEM: ONLINE</span>
             <span className="text-gray-500 font-cyber text-xs">SECURE: 256-BIT</span>
             <span className="text-gray-500 font-cyber text-xs">PAYMENT: WECHAT</span>
+            <span className="text-gray-500 font-cyber text-xs">VER: {APP_VERSION}</span>
           </div>
           <div className="text-gray-600 font-orbitron text-xs">
-            CYBER BEGGING NETWORK © 2024
+            CYBER BEGGING NETWORK © 2024 | BUILD: {BUILD_TIME.split('T')[0]} {BUILD_TIME.split('T')[1]?.slice(0, 5)}
           </div>
         </div>
       </footer>
