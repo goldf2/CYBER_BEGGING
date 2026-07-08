@@ -5,6 +5,9 @@ import { traeBadgePlugin } from 'vite-plugin-trae-solo-badge';
 
 // https://vite.dev/config/
 export default defineConfig({
+  build: {
+    outDir: 'dist/client',
+  },
   plugins: [
     react({
       babel: {

@@ -1,5 +1,5 @@
 import { Router, type Request, type Response } from 'express';
-import crypto from 'crypto';
+import * as crypto from 'crypto';
 import { createNativeOrder, decryptResource, queryOrder } from '../lib/wxpay.js';
 import { createDonationRecord, getDonations } from '../services/donationService.js';
 
@@ -67,8 +67,9 @@ router.post('/create', async (req: Request, res: Response): Promise<void> => {
 
 router.post('/notify', async (req: Request, res: Response): Promise<void> => {
   try {
-    const body = await req.text();
-    const event = JSON.parse(body);
+    const rawBody = req.body;
+    const bodyStr = typeof rawBody === 'string' ? rawBody : JSON.stringify(rawBody);
+    const event = JSON.parse(bodyStr);
 
     console.log('Received WeChat Pay webhook:', event);
     

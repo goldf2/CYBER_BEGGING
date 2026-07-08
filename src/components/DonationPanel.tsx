@@ -1,35 +1,30 @@
 import { useState } from 'react';
-import { CreditCard, Sparkles } from 'lucide-react';
+import { CreditCard, Sparkles, Globe } from 'lucide-react';
+
+export type PaymentMethod = 'wechat' | 'creem';
 
 interface DonationPanelProps {
-  onDonate: (amount: number) => void;
+  onDonate: (amount: number, method: PaymentMethod) => void;
   isLoading: boolean;
 }
 
-const presetAmounts = [0.01, 0.1, 1, 10];
+const CNY_PRESETS = [0.01, 0.1, 1, 10];
+const USD_PRESETS = [1, 2, 5, 10];
 
 export default function DonationPanel({ onDonate, isLoading }: DonationPanelProps) {
   const [selectedAmount, setSelectedAmount] = useState<number>(1);
-  const [customAmount, setCustomAmount] = useState<string>('');
-  const [isCustom, setIsCustom] = useState(false);
+  const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('wechat');
+
+  const presets = paymentMethod === 'wechat' ? CNY_PRESETS : USD_PRESETS;
+  const currency = paymentMethod === 'wechat' ? 'CNY' : 'USD';
 
   const handleAmountSelect = (amount: number) => {
     setSelectedAmount(amount);
-    setIsCustom(false);
-    setCustomAmount('');
-  };
-
-  const handleCustomChange = (value: string) => {
-    setCustomAmount(value);
-    setIsCustom(true);
-    const numValue = parseFloat(value) || 0;
-    setSelectedAmount(numValue);
   };
 
   const handleDonate = () => {
-    const amount = isCustom ? (parseFloat(customAmount) || 0) : selectedAmount;
-    if (amount > 0) {
-      onDonate(amount);
+    if (selectedAmount > 0) {
+      onDonate(selectedAmount, paymentMethod);
     }
   };
 
@@ -46,20 +41,26 @@ export default function DonationPanel({ onDonate, isLoading }: DonationPanelProp
         </div>
 
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
-          {presetAmounts.map((amount) => (
+          {presets.map((amount) => (
             <button
               key={amount}
               onClick={() => handleAmountSelect(amount)}
               className={`relative p-4 rounded-lg font-cyber text-lg transition-all duration-300 ${
-                selectedAmount === amount && !isCustom
-                  ? 'bg-cyber-cyan/20 border-2 border-cyber-cyan text-cyber-cyan'
+                selectedAmount === amount
+                  ? paymentMethod === 'wechat'
+                    ? 'bg-cyber-green/20 border-2 border-cyber-green text-cyber-green'
+                    : 'bg-purple-500/20 border-2 border-purple-500 text-purple-400'
                   : 'bg-transparent border-2 border-gray-700 text-gray-300 hover:border-cyber-cyan/50 hover:text-cyber-cyan'
               }`}
             >
-              <span className="text-sm">CNY</span>
-              <div className="text-xl font-bold">{amount.toFixed(2)}</div>
-              {selectedAmount === amount && !isCustom && (
-                <div className="absolute -top-2 -right-2 w-4 h-4 bg-cyber-cyan rounded-full" />
+              <span className="text-sm">{currency}</span>
+              <div className="text-xl font-bold">
+                {paymentMethod === 'wechat' ? amount.toFixed(2) : amount}
+              </div>
+              {selectedAmount === amount && (
+                <div className={`absolute -top-2 -right-2 w-4 h-4 rounded-full ${
+                  paymentMethod === 'wechat' ? 'bg-cyber-green' : 'bg-purple-500'
+                }`} />
               )}
             </button>
           ))}
@@ -67,50 +68,81 @@ export default function DonationPanel({ onDonate, isLoading }: DonationPanelProp
 
         <div className="mb-6">
           <label className="block text-sm text-gray-400 font-cyber mb-2">
-            CUSTOM AMOUNT
+            PAYMENT METHOD
           </label>
-          <div className="relative">
-            <span className="absolute left-4 top-1/2 -translate-y-1/2 text-cyber-cyan font-cyber text-lg">
-              CNY
-            </span>
-            <input
-              type="number"
-              value={customAmount}
-              onChange={(e) => handleCustomChange(e.target.value)}
-              placeholder="输入自定义金额"
-              className="w-full bg-transparent border-2 border-gray-700 rounded-lg px-10 py-3 text-white font-cyber text-lg focus:border-cyber-cyan focus:outline-none transition-colors"
-            />
+          <div className="grid grid-cols-2 gap-3">
+            <button
+              onClick={() => {
+                setPaymentMethod('wechat');
+                setSelectedAmount(1);
+              }}
+              className={`flex items-center justify-center gap-2 p-3 rounded-lg font-cyber transition-all duration-300 ${
+                paymentMethod === 'wechat'
+                  ? 'bg-cyber-green/20 border-2 border-cyber-green text-cyber-green'
+                  : 'bg-transparent border-2 border-gray-700 text-gray-300 hover:border-cyber-green/50 hover:text-cyber-green'
+              }`}
+            >
+              <CreditCard className="w-5 h-5" />
+              WECHAT PAY
+            </button>
+            <button
+              onClick={() => {
+                setPaymentMethod('creem');
+                setSelectedAmount(1);
+              }}
+              className={`flex items-center justify-center gap-2 p-3 rounded-lg font-cyber transition-all duration-300 ${
+                paymentMethod === 'creem'
+                  ? 'bg-purple-500/20 border-2 border-purple-500 text-purple-400'
+                  : 'bg-transparent border-2 border-gray-700 text-gray-300 hover:border-purple-500/50 hover:text-purple-400'
+              }`}
+            >
+              <Globe className="w-5 h-5" />
+              CREEM PAY
+            </button>
           </div>
         </div>
 
         <div className="text-center mb-6">
           <span className="text-gray-400 font-cyber text-sm">SELECTED:</span>
-          <span className="text-cyber-cyan font-orbitron text-2xl ml-2">
-            {isCustom ? customAmount || '0.00' : selectedAmount.toFixed(2)} CNY
+          <span className={`font-orbitron text-2xl ml-2 ${
+            paymentMethod === 'wechat' ? 'text-cyber-green' : 'text-purple-400'
+          }`}>
+            {paymentMethod === 'wechat' ? selectedAmount.toFixed(2) : selectedAmount} {currency}
           </span>
         </div>
 
         <button
           onClick={handleDonate}
-          disabled={isLoading || (isCustom && (!customAmount || parseFloat(customAmount) <= 0))}
-          className="cyber-btn w-full py-4 bg-gradient-to-r from-cyber-cyan/20 to-cyber-purple/20 border-2 border-cyber-cyan text-cyber-cyan font-orbitron text-lg tracking-wider hover:from-cyber-cyan/30 hover:to-cyber-purple/30 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-3"
-          style={{ boxShadow: '0 0 30px rgba(0, 255, 255, 0.2)' }}
+          disabled={isLoading || selectedAmount <= 0}
+          className={`w-full py-4 border-2 font-orbitron text-lg tracking-wider transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-3 ${
+            paymentMethod === 'wechat'
+              ? 'bg-gradient-to-r from-cyber-green/20 to-cyber-cyan/20 border-cyber-green text-cyber-green hover:from-cyber-green/30 hover:to-cyber-cyan/30'
+              : 'bg-gradient-to-r from-purple-500/20 to-purple-600/20 border-purple-500 text-purple-400 hover:from-purple-500/30 hover:to-purple-600/30'
+          }`}
+          style={{ boxShadow: paymentMethod === 'wechat' ? '0 0 30px rgba(0, 255, 136, 0.2)' : '0 0 30px rgba(168, 85, 247, 0.2)' }}
         >
           {isLoading ? (
             <>
-              <div className="w-5 h-5 border-2 border-cyber-cyan border-t-transparent rounded-full animate-spin" />
+              <div className={`w-5 h-5 border-2 border-t-transparent rounded-full animate-spin ${
+                paymentMethod === 'wechat' ? 'border-cyber-green' : 'border-purple-500'
+              }`} />
               PROCESSING...
             </>
-          ) : (
+          ) : paymentMethod === 'wechat' ? (
             <>
               <CreditCard className="w-5 h-5" />
               WECHAT PAY
+            </>
+          ) : (
+            <>
+              <Globe className="w-5 h-5" />
+              CREEM PAY
             </>
           )}
         </button>
 
         <p className="text-center text-gray-500 text-xs mt-4 font-cyber">
-          安全支付 · 微信官方渠道 · 即时到账
+          {paymentMethod === 'wechat' ? '安全支付 · 微信官方渠道 · 即时到账' : '全球支付 · 支持美元 USD'}
         </p>
       </div>
     </div>

@@ -61,21 +61,22 @@ export default function ProgressBar({ current, target }: ProgressBarProps) {
           </div>
         </div>
 
-        <div className="flex items-center justify-between font-orbitron">
-          <div>
-            <span className="text-gray-400 text-sm">RAISED:</span>
-            <span className="text-cyber-cyan text-2xl ml-2">{current.toFixed(2)}</span>
-            <span className="text-gray-400 text-sm ml-1">CNY</span>
+        <div className="grid grid-cols-3 gap-2 font-orbitron">
+          <div className="text-left">
+            <div className="text-gray-400 text-xs">RAISED</div>
+            <div className="text-cyber-cyan text-xl font-bold">{current.toFixed(2)}</div>
+            <div className="text-gray-500 text-xs">CNY</div>
           </div>
           
           <div className="text-center">
-            <span className="text-cyber-purple text-3xl font-bold">{animatedProgress.toFixed(1)}%</span>
+            <div className="text-gray-400 text-xs">PROGRESS</div>
+            <div className="text-cyber-purple text-2xl font-bold">{animatedProgress.toFixed(1)}%</div>
           </div>
           
-          <div>
-            <span className="text-gray-400 text-sm">GOAL:</span>
-            <span className="text-white text-2xl ml-2">{target.toFixed(2)}</span>
-            <span className="text-gray-400 text-sm ml-1">CNY</span>
+          <div className="text-right">
+            <div className="text-gray-400 text-xs">GOAL</div>
+            <div className="text-white text-xl font-bold">{target.toFixed(2)}</div>
+            <div className="text-gray-500 text-xs">CNY</div>
           </div>
         </div>
 

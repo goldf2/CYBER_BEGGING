@@ -1,0 +1,14 @@
+node_modules
+.env
+.env.local
+.env.*
+.git
+.gitignore
+dist
+.trae
+.eslintrc.js
+tailwind.config.js
+postcss.config.js
+nodemon.json
+vercel.json
+*.md

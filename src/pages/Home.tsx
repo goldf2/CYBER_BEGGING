@@ -46,49 +46,69 @@ export default function Home() {
     }
   };
 
-  const handleDonate = async (amount: number) => {
+  const handleDonate = async (amount: number, method: 'wechat' | 'creem') => {
     setIsLoading(true);
     setShowError('');
     setShowQRCode(false);
     
     try {
-      const response = await fetch('/api/payment/create', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          amount,
-          description: '赛博乞讨捐赠',
-        }),
-      });
-      
-      const data = await response.json();
-      
-      if (data.success && data.data) {
-        const { code_url, trade_type } = data.data;
+      if (method === 'wechat') {
+        const response = await fetch('/api/payment/create', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            amount,
+            description: '赛博乞讨捐赠',
+          }),
+        });
         
-        if (trade_type === 'NATIVE' && code_url) {
-          setQrCodeUrl(code_url);
-          setQrCodeAmount(amount);
-          setShowQRCode(true);
-          setIsLoading(false);
+        const data = await response.json();
+        
+        if (data.success && data.data) {
+          const { code_url, trade_type } = data.data;
           
-          const checkInterval = setInterval(() => {
-            fetchDonations().then(() => {
-              const recentDonation = donations.find(d => d.amount === amount);
-              if (recentDonation) {
-                clearInterval(checkInterval);
-                setShowQRCode(false);
-                setShowSuccess(true);
-                setTimeout(() => {
-                  setShowSuccess(false);
-                }, 3000);
-              }
-            });
-          }, 3000);
+          if (trade_type === 'NATIVE' && code_url) {
+            setQrCodeUrl(code_url);
+            setQrCodeAmount(amount);
+            setShowQRCode(true);
+            setIsLoading(false);
+            
+            const checkInterval = setInterval(() => {
+              fetchDonations().then(() => {
+                const recentDonation = donations.find(d => d.amount === amount);
+                if (recentDonation) {
+                  clearInterval(checkInterval);
+                  setShowQRCode(false);
+                  setShowSuccess(true);
+                  setTimeout(() => {
+                    setShowSuccess(false);
+                  }, 3000);
+                }
+              });
+            }, 3000);
+          }
+        } else {
+          setShowError(data.message || '支付配置未完成，请联系管理员');
+          setIsLoading(false);
         }
       } else {
-        setShowError(data.message || '支付配置未完成，请联系管理员');
-        setIsLoading(false);
+        const response = await fetch('/api/creem/create-checkout', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            amount,
+            description: '赛博乞讨捐赠',
+          }),
+        });
+        
+        const data = await response.json();
+        
+        if (data.success && data.data?.checkoutUrl) {
+          window.location.href = data.data.checkoutUrl;
+        } else {
+          setShowError(data.message || 'Creem 支付配置未完成，请联系管理员');
+          setIsLoading(false);
+        }
       }
     } catch (error) {
       console.error('支付请求失败:', error);

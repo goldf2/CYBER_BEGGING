@@ -7,24 +7,44 @@ import cors from 'cors'
 import path from 'path'
 import dotenv from 'dotenv'
 import { fileURLToPath } from 'url'
+import querystring from 'querystring'
 import authRoutes from './routes/auth.js'
 import paymentRoutes from './routes/payment.js'
+import creemRoutes from './routes/creem.js'
 import { initDonationsTable } from './services/donationService.js'
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
 
-dotenv.config({ path: path.resolve(__dirname, '../.env.local'), override: true })
+dotenv.config()
 
 const app: express.Application = express()
 
 app.use(cors())
-app.use(express.json({ limit: '10mb' }))
-app.use(express.urlencoded({ extended: true, limit: '10mb' }))
-app.use(express.text({ limit: '10mb' }))
+app.use(express.raw({ limit: '10mb', type: '*/*' }))
+
+app.use((req: Request, res: Response, next: NextFunction) => {
+  const rawBody = req.body
+  ;(req as any).rawBody = rawBody
+
+  const contentType = req.headers['content-type'] || ''
+  if (contentType.includes('application/json')) {
+    try {
+      req.body = JSON.parse(rawBody?.toString() || '{}')
+    } catch {
+      req.body = {}
+    }
+  } else if (contentType.includes('application/x-www-form-urlencoded')) {
+    req.body = querystring.parse(rawBody?.toString() || '')
+  } else {
+    req.body = rawBody?.toString() || ''
+  }
+  next()
+})
 
 app.use('/api/auth', authRoutes)
 app.use('/api/payment', paymentRoutes)
+app.use('/api/creem', creemRoutes)
 
 app.use(
   '/api/health',
@@ -36,6 +56,13 @@ app.use(
   },
 )
 
+app.use('/api/*', (req: Request, res: Response) => {
+  res.status(404).json({
+    success: false,
+    error: 'API not found',
+  })
+})
+
 app.use((error: Error, req: Request, res: Response, next: NextFunction) => {
   res.status(500).json({
     success: false,
@@ -43,11 +70,10 @@ app.use((error: Error, req: Request, res: Response, next: NextFunction) => {
   })
 })
 
-app.use((req: Request, res: Response) => {
-  res.status(404).json({
-    success: false,
-    error: 'API not found',
-  })
+app.use(express.static(path.join(__dirname, '../client')))
+
+app.get('*', (req: Request, res: Response) => {
+  res.sendFile(path.join(__dirname, '../client/index.html'))
 })
 
 initDonationsTable().catch(console.error)
