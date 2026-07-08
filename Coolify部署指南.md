@@ -166,7 +166,7 @@ flowchart LR
     subgraph Stage 2: Runner
         B1[node:20-alpine] --> B2[安装生产依赖 npm ci --only=production]
         B2 --> B3[复制构建产物 COPY --from=builder]
-        B3 --> B4[暴露端口 3001]
+        B3 --> B4[暴露端口 3000]
         B4 --> B5[启动应用 node dist/api/server.js]
     end
     
@@ -253,7 +253,7 @@ flowchart TD
 | `NEXT_PUBLIC_SUPABASE_URL` | Supabase 项目 URL |
 | `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Supabase Anon Key |
 | `SUPABASE_SERVICE_ROLE_KEY` | Supabase Service Role Key |
-| `PORT` | `3001` |
+| `PORT` | `3000` |
 
 ### 步骤 4：部署
 
