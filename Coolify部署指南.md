@@ -250,7 +250,9 @@ flowchart TD
 | `WXPAY_SERIAL_NO` | 证书序列号 |
 | `WXPAY_API_V3_KEY` | API v3 密钥 |
 | `WXPAY_NOTIFY_URL` | `https://your-domain.com/api/payment/notify` |
-| `DATABASE_URL` | PostgreSQL 连接 URL |
+| `NEXT_PUBLIC_SUPABASE_URL` | Supabase 项目 URL |
+| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Supabase Anon Key |
+| `SUPABASE_SERVICE_ROLE_KEY` | Supabase Service Role Key |
 | `PORT` | `3001` |
 
 ### 步骤 4：部署
@@ -290,12 +292,13 @@ flowchart TD
 
 ### Q4：数据库连接失败
 
-**原因**：数据库服务和应用服务不在同一个网络，或连接字符串错误。
+**原因**：Supabase 配置不正确，或网络无法访问。
 
 **解决**：
-- 在 Coolify 中，确保数据库和应用在同一个项目
-- 使用 Coolify 提供的数据库连接信息
-- 检查防火墙/网络配置
+- 检查 `NEXT_PUBLIC_SUPABASE_URL` 是否正确（格式：`https://xxx.supabase.co`）
+- 检查 `SUPABASE_SERVICE_ROLE_KEY` 是否正确（需要完整密钥）
+- 确保服务器能访问外网（Supabase 是云服务）
+- 在 Supabase SQL Editor 中执行 `supabase/init.sql` 创建表
 
 ---
 
